@@ -1,6 +1,21 @@
 "use strict";
-let dns = require("native-dns");
-let asyncLib = require("async");
+const dns = require("native-dns");
+const asyncLib = require("async");
+const mysql = require("mysql");
+
+const conn = mysql.createConnection({
+  host: "localhost",
+  database: "dns"
+});
+
+conn.connect(function(err) {
+  if (err) throw err;
+  const sql = "CREATE TABLE IF NOT EXISTS requests ()"; // add columns
+  conn.query(sql, function(err, _result) {
+    if (err) throw err;
+    console.log("Table created");
+  });
+});
 
 const dnsListeningPort = +process.env.DNS_PORT || 53;
 const dnsServerAddress = process.env.DNS_SERVER_ADDRESS || "8.8.8.8";
@@ -23,6 +38,9 @@ function proxy(question, response, cb) {
 	});
 	request.on("message", (err, msg) => {
 		console.log("msg", msg);
+    new Promise((resolve, reject) => {
+      // write the question/answer to the database
+    });
 		msg.answer.forEach(a => response.answer.push(a));
 	});
 	request.on("end", cb);
