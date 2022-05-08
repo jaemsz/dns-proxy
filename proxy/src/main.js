@@ -2,11 +2,11 @@
 let dns = require("native-dns");
 let asyncLib = require("async");
 
-const dnsListeningPort = process.env.DNS_PORT || 53;
+const dnsListeningPort = +process.env.DNS_PORT || 53;
 const dnsServerAddress = process.env.DNS_SERVER_ADDRESS || "8.8.8.8";
-const dnsServerPort = process.env.DNS_SERVER_PORT || 53;
+const dnsServerPort = +process.env.DNS_SERVER_PORT || 53;
 const dnsServerType = process.env.DNS_SERVER_TYPE || "udp";
-const dnsTimeout = process.env.DNS_TIMEOUT || 1000;
+const dnsTimeout = +process.env.DNS_TIMEOUT || 1000;
 
 let dnsServer = {
 	address: dnsServerAddress,
