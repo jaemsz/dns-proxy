@@ -24,35 +24,35 @@ const dnsServerType = process.env.DNS_SERVER_TYPE || "udp";
 const dnsTimeout = +process.env.DNS_TIMEOUT || 1000;
 
 let dnsServer = {
-	address: dnsServerAddress,
-	port: dnsServerPort,
-	type: dnsServerType
+  address: dnsServerAddress,
+  port: dnsServerPort,
+  type: dnsServerType
 };
 
 function proxy(question, response, cb) {
-	console.log("proxying", question);
-	const request = dns.Request({
-		question: question,
-		server: dnsServer,
-		timeout: dnsTimeout
-	});
-	request.on("message", (err, msg) => {
-		console.log("msg", msg);
+  console.log("proxying", question);
+  const request = dns.Request({
+    question: question,
+    server: dnsServer,
+    timeout: dnsTimeout
+  });
+  request.on("message", (err, msg) => {
+    console.log("msg", msg);
     new Promise((resolve, reject) => {
       // write the question/answer to the database
     });
-		msg.answer.forEach(a => response.answer.push(a));
-	});
-	request.on("end", cb);
-	request.send();
+    msg.answer.forEach(a => response.answer.push(a));
+  });
+  request.on("end", cb);
+  request.send();
 }
 
 function handleRequest(request, response) {
-	const f = [];
-	request.question.forEach(question => {
-		f.push(cb => proxy(question, response, cb));
-	});
-	asyncLib.parallel(f, function() { response.send(); });
+  const f = [];
+  request.question.forEach(question => {
+    f.push(cb => proxy(question, response, cb));
+  });
+  asyncLib.parallel(f, function() { response.send(); });
 }
 
 let server = dns.createServer();
