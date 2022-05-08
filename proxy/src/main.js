@@ -1,5 +1,4 @@
 "use strict";
-
 let dns = require("native-dns");
 let asyncLib = require("async");
 
@@ -17,7 +16,7 @@ let dnsServer = {
 
 function proxy(question, response, cb) {
 	console.log("proxying", question);
-	var request = dns.Request({
+	const request = dns.Request({
 		question: question,
 		server: dnsServer,
 		timeout: dnsTimeout
@@ -31,7 +30,7 @@ function proxy(question, response, cb) {
 }
 
 function handleRequest(request, response) {
-	let f = [];
+	const f = [];
 	request.question.forEach(question => {
 		f.push(cb => proxy(question, response, cb));
 	});
