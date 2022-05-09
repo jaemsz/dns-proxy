@@ -26,6 +26,7 @@ dns-proxy is a nodejs application that is capable of proxying DNS requests and p
 - Port 53 is in use by systemd-resolve, so this service needs to be stopped and disabled.
 - Update /etc/resolv.conf
   - nameserver 127.0.0.1
+- Install MongoDB
 - Clone the git repo
 - Run dns-proxy
   - sudo node main.js
