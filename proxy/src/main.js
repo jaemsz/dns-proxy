@@ -3,7 +3,7 @@ const dns = require("native-dns");
 const asyncLib = require("async");
 const mongo = require("mongodb");
 
-const mongoUrl = "mongodb://localhost:27017/";
+const mongoUrl = process.env.DNS_MONGO_URL || "mongodb://localhost:27017/";
 const mongoClient = mongo.MongoClient;
 let mongoDb = null;
 
@@ -11,7 +11,7 @@ mongoClient.connect(mongoUrl, function(err, db) {
   if (err) throw err;
   mongoDb = db;
   const dbo = mongoDb.db("dns");
-  dbo.createCollection("messages", function(err, res) {
+  dbo.createCollection("messages", function(err, _res) {
     if (err) throw err;
     console.log("dns.messages collection created");
   });
@@ -41,18 +41,18 @@ function proxy(question, response, cb) {
     console.log("msg", msg);
     msg.answer.forEach(a => {
       response.answer.push(a)
-      new Promise((resolve, reject) => {
-        const obj = {
-          timestamp: Date.now(),
-          msg: msg
-        };
-        const dbo = mongoDb.db("dns");
-        dbo.collection("messages").insertOne(obj, function(err, res) {
-          if (err) {
-            reject(err);
-          }
-          resolve();
-        });
+    });
+    new Promise((resolve, reject) => {
+      const obj = {
+        timestamp: Date.now(),
+        msg: msg
+      };
+      const dbo = mongoDb.db("dns");
+      dbo.collection("messages").insertOne(obj, function(err, res) {
+        if (err) {
+          reject(err);
+        }
+        resolve();
       });
     });
   });
