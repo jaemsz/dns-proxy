@@ -1,27 +1,19 @@
 "use strict";
 const dns = require("native-dns");
 const asyncLib = require("async");
-const mysql = require("mysql");
+const mongo = require("mongodb");
 
-const conn = mysql.createConnection({
-  host: "localhost",
-  database: "dns"
-});
+const mongoUrl = "mongodb://localhost:27017/";
+const mongoClient = mongo.MongoClient;
+let mongoDb = null;
 
-conn.connect(function(err) {
+mongoClient.connect(mongoUrl, function(err, db) {
   if (err) throw err;
-  const sql =
-    `CREATE TABLE IF NOT EXISTS requests (
-      timestamp TIMESTAMP,
-      dnstype VARCHAR(10),
-      sourceip VARCHAR(20),
-      domain VARCHAR(260),
-      querytype VARCHAR(10),
-      ttl INTEGER
-    )`;
-  conn.query(sql, function(err, _result) {
+  mongoDb = db;
+  const dbo = mongoDb.db("dns");
+  dbo.createCollection("messages", function(err, res) {
     if (err) throw err;
-    console.log("Table created");
+    console.log("dns.messages collection created");
   });
 });
 
@@ -49,20 +41,17 @@ function proxy(question, response, cb) {
     console.log("msg", msg);
     msg.answer.forEach(a => {
       response.answer.push(a)
-        // write the data to the database
-        new Promise((resolve, reject) => {
-        const timestamp = Date.now();
-        const dnsType = "";
-        const sourceIp = "";
-        const domain = "";
-        const queryType = "";
-        const ttl = "";
-        const sql = `
-          INSERT INTO requests (timestamp, dnstype, sourceip, domain, querytype, ttl)
-          VALUES (${timestamp}, ${dnsType}, ${sourceIp}, ${domain}, ${queryType}, ${ttl})`;
-        conn.query(sql, function(err, result) {
-          if (err) throw err;
-          console.log("Inserted 1 record");
+      new Promise((resolve, reject) => {
+        const obj = {
+          timestamp: Date.now(),
+          msg: msg
+        };
+        const dbo = mongoDb.db("dns");
+        dbo.collection("messages").insertOne(obj, function(err, res) {
+          if (err) {
+            reject(err);
+          }
+          resolve();
         });
       });
     });
@@ -81,8 +70,11 @@ function handleRequest(request, response) {
 
 let server = dns.createServer();
 server.on("listening", () => console.log("Server listening on", server.address()));
-server.on("close", () => console.log("server closed", server.address()));
 server.on("error", (err, buff, req, res) => console.error(err.stack));
 server.on("socketError", (err, socket) => console.error(err));
 server.on("request", handleRequest);
+server.on("close", () => {
+  console.log("server closed", server.address());
+  if (mongoDb) mongoDb.close();
+});
 server.serve(dnsListeningPort);
