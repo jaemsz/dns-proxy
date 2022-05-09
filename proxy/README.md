@@ -48,3 +48,4 @@ dns-proxy is a nodejs application that is capable of proxying DNS requests and p
 - [ ] Add support for Cassandra
 - [ ] Add Dockerfile for dns-proxy
 - [ ] Add config for Kubernetes cluster
+- [ ] Add an express web server to display DNS requests
