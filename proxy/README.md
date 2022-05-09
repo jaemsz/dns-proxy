@@ -34,8 +34,17 @@ dns-proxy is a nodejs application that is capable of proxying DNS requests and p
 - Run dns-proxy
   - sudo node main.js
 
+## How to modify DNS settings on Windows
+- Launch cmd.exe as administrator
+- Run netsh.exe
+- interface ip show config
+  - Find the interface which you want to modify DNS settings (ie. Ethernet 0)
+- interface ip set dns "Ethernet 0" static "IP address of DNS proxy"
+
 ## TODO
 - [ ] Add configuration file
 - [ ] Add support for ElasticSearch
 - [ ] Add support for Postgresql
 - [ ] Add support for Cassandra
+- [ ] Add Dockerfile for dns-proxy
+- [ ] Add config for Kubernetes cluster
