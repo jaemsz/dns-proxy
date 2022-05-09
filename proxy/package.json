@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "async": "^3.2.3",
-    "native-dns": "^0.7.0"
+    "native-dns": "^0.7.0",
+    "mongodb": "^4.5.0"
   }
 }
