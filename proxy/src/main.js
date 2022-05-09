@@ -45,24 +45,27 @@ function proxy(question, response, cb) {
     timeout: dnsTimeout
   });
   request.on("message", (err, msg) => {
+    if (err) throw err;
     console.log("msg", msg);
-    new Promise((resolve, reject) => {
-      // write the data to the database
-      const timestamp = Date.now();
-      const dnsType = "";
-      const sourceIp = "";
-      const domain = "";
-      const queryType = "";
-      const ttl = "";
-      const sql = `
-        INSERT INTO requests (timestamp, dnstype, sourceip, domain, querytype, ttl)
-        VALUES (${timestamp}, ${dnsType}, ${sourceIp}, ${domain}, ${queryType}, ${ttl})`;
-      conn.query(sql, function(err, result) {
-        if (err) throw err;
-        console.log("Inserted 1 record");
-      })
+    msg.answer.forEach(a => {
+      response.answer.push(a)
+        // write the data to the database
+        new Promise((resolve, reject) => {
+        const timestamp = Date.now();
+        const dnsType = "";
+        const sourceIp = "";
+        const domain = "";
+        const queryType = "";
+        const ttl = "";
+        const sql = `
+          INSERT INTO requests (timestamp, dnstype, sourceip, domain, querytype, ttl)
+          VALUES (${timestamp}, ${dnsType}, ${sourceIp}, ${domain}, ${queryType}, ${ttl})`;
+        conn.query(sql, function(err, result) {
+          if (err) throw err;
+          console.log("Inserted 1 record");
+        });
+      });
     });
-    msg.answer.forEach(a => response.answer.push(a));
   });
   request.on("end", cb);
   request.send();
