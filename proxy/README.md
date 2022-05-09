@@ -27,6 +27,9 @@ dns-proxy is a nodejs application that is capable of proxying DNS requests and p
 - Update /etc/resolv.conf
   - nameserver 127.0.0.1
 - Install MongoDB
+  - Install docker
+  - Pull mongodb image
+  - Start container
 - Clone the git repo
 - Run dns-proxy
   - sudo node main.js
