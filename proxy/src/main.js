@@ -10,7 +10,15 @@ const conn = mysql.createConnection({
 
 conn.connect(function(err) {
   if (err) throw err;
-  const sql = "CREATE TABLE IF NOT EXISTS requests ()"; // add columns
+  const sql =
+    `CREATE TABLE IF NOT EXISTS requests (
+      timestamp TIMESTAMP,
+      dnstype VARCHAR(10),
+      sourceip VARCHAR(20),
+      domain VARCHAR(260),
+      querytype VARCHAR(10),
+      ttl INTEGER
+    )`;
   conn.query(sql, function(err, _result) {
     if (err) throw err;
     console.log("Table created");
@@ -39,7 +47,20 @@ function proxy(question, response, cb) {
   request.on("message", (err, msg) => {
     console.log("msg", msg);
     new Promise((resolve, reject) => {
-      // write the question/answer to the database
+      // write the data to the database
+      const timestamp = Date.now();
+      const dnsType = "";
+      const sourceIp = "";
+      const domain = "";
+      const queryType = "";
+      const ttl = "";
+      const sql = `
+        INSERT INTO requests (timestamp, dnstype, sourceip, domain, querytype, ttl)
+        VALUES (${timestamp}, ${dnsType}, ${sourceIp}, ${domain}, ${queryType}, ${ttl})`;
+      conn.query(sql, function(err, result) {
+        if (err) throw err;
+        console.log("Inserted 1 record");
+      })
     });
     msg.answer.forEach(a => response.answer.push(a));
   });
