@@ -23,7 +23,7 @@ const dnsServerPort = +process.env.DNS_SERVER_PORT || 53;
 const dnsServerType = process.env.DNS_SERVER_TYPE || "udp";
 const dnsTimeout = +process.env.DNS_TIMEOUT || 1000;
 
-let dnsServer = {
+const dnsServer = {
   address: dnsServerAddress,
   port: dnsServerPort,
   type: dnsServerType
@@ -72,7 +72,7 @@ function handleRequest(request, response) {
   asyncLib.parallel(f, function() { response.send(); });
 }
 
-let server = dns.createServer();
+const server = dns.createServer();
 server.on("listening", () => console.log("Server listening on", server.address()));
 server.on("error", (err, _buff, _req, _res) => console.error(err.stack));
 server.on("socketError", (err, _socket) => console.error(err));
