@@ -29,6 +29,22 @@ let dnsServer = {
   type: dnsServerType
 };
 
+function saveMessageToDb(msg) {
+  return new Promise((resolve, reject) => {
+    const obj = {
+      timestamp: Date.now(),
+      msg: msg
+    };
+    const dbo = mongoDb.db("dns");
+    dbo.collection("messages").insertOne(obj, function(err, res) {
+      if (err) {
+        reject(err);
+      }
+      resolve(res);
+    });
+  });
+}
+
 function proxy(question, response, cb) {
   console.log("proxying", question);
   const request = dns.Request({
@@ -42,19 +58,7 @@ function proxy(question, response, cb) {
     msg.answer.forEach(a => {
       response.answer.push(a)
     });
-    new Promise((resolve, reject) => {
-      const obj = {
-        timestamp: Date.now(),
-        msg: msg
-      };
-      const dbo = mongoDb.db("dns");
-      dbo.collection("messages").insertOne(obj, function(err, res) {
-        if (err) {
-          reject(err);
-        }
-        resolve();
-      });
-    });
+    saveMessageToDb(msg);
   });
   request.on("end", cb);
   request.send();
@@ -70,8 +74,8 @@ function handleRequest(request, response) {
 
 let server = dns.createServer();
 server.on("listening", () => console.log("Server listening on", server.address()));
-server.on("error", (err, buff, req, res) => console.error(err.stack));
-server.on("socketError", (err, socket) => console.error(err));
+server.on("error", (err, _buff, _req, _res) => console.error(err.stack));
+server.on("socketError", (err, _socket) => console.error(err));
 server.on("request", handleRequest);
 server.on("close", () => {
   console.log("server closed", server.address());
