@@ -11,9 +11,9 @@ mongoClient.connect(mongoUrl, function(err, db) {
   if (err) throw err;
   mongoDb = db;
   const dbo = mongoDb.db("dns");
-  dbo.createCollection("messages", function(err, _res) {
+  dbo.createCollection("requests", function(err, _res) {
     if (err) throw err;
-    console.log("dns.messages collection created");
+    console.log("dns.requests collection created");
   });
 });
 
@@ -29,14 +29,15 @@ const dnsServer = {
   type: dnsServerType
 };
 
-function saveMessageToDb(msg) {
+function saveMessageToDb(request, response) {
   return new Promise((resolve, reject) => {
     const obj = {
       timestamp: Date.now(),
-      msg: msg
+      request: request,
+      response: response
     };
     const dbo = mongoDb.db("dns");
-    dbo.collection("messages").insertOne(obj, function(err, res) {
+    dbo.collection("requests").insertOne(obj, function(err, res) {
       if (err) {
         reject(err);
       }
@@ -58,7 +59,6 @@ function proxy(question, response, cb) {
     msg.answer.forEach(a => {
       response.answer.push(a)
     });
-    saveMessageToDb(msg);
   });
   request.on("end", cb);
   request.send();
@@ -69,7 +69,10 @@ function handleRequest(request, response) {
   request.question.forEach(question => {
     f.push(cb => proxy(question, response, cb));
   });
-  asyncLib.parallel(f, function() { response.send(); });
+  asyncLib.parallel(f, function() {
+    response.send();
+    saveMessageToDb(request, response);
+  });
 }
 
 const server = dns.createServer();
