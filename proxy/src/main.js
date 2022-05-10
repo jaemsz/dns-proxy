@@ -88,11 +88,15 @@ server.on("listening", () => {
     const dbo = mongoDb.db("dns");
     const collections = await mongoDb.db("dns").listCollections({}, { nameOnly: true }).toArray();
     console.log("collections", collections);
-    if (!collections.includes("requests")) {
+    let exists = false;
+    collections.forEach(collection => {
+      if (collection.name === "requests") exists = true;
+    });
+    if (!exists) {
       dbo.createCollection("requests", function(err, _res) {
         if (err) throw err;
         console.log("dns.requests collection created");
-      });  
+      });
     }
   });
 });
