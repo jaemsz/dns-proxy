@@ -59,18 +59,20 @@ function proxy(question, response, cb) {
   request.send();
 }
 
-async function handleRequest(request, response) {
+function handleRequest(request, response) {
   const f = [];
   request.question.forEach(question => {
     f.push(cb => proxy(question, response, cb));
   });
   asyncLib.parallel(f, function() {
     response.send();
-    try {
-      await saveMessageToDb(request, response);
-    } catch {
-      console.log("saveMessageToDb failed");
-    }
+      saveMessageToDb(request, response)
+        .then((res) => {
+          console.log("saveMessageToDb suceeded", res);
+        })
+        .catch((err) => {
+          console.log("saveMessageToDb failed", err);
+        })
   });
 }
 
