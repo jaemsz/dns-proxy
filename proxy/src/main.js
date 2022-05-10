@@ -76,9 +76,9 @@ function handleRequest(request, response) {
 }
 
 const server = dns.createServer();
-server.on("listening", async () => {
+server.on("listening", () => {
   console.log("Server listening on", server.address());
-  mongoClient.connect(mongoUrl, function(err, db) {
+  mongoClient.connect(mongoUrl, async function(err, db) {
     console.log("Connecting to mongo");
     if (err) {
       console.log("Failed to connect to mongo");
