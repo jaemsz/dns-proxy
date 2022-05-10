@@ -86,7 +86,7 @@ server.on("listening", () => {
     }
     mongoDb = db;
     const dbo = mongoDb.db("dns");
-    const collections = await client.db(dbName).listCollections({}, { nameOnly: true }).toArray();
+    const collections = await mongoDb.db("dns").listCollections({}, { nameOnly: true }).toArray();
     console.log("collections", collections);
     if (!collections.includes("requests")) {
       dbo.createCollection("requests", function(err, _res) {
