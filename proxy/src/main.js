@@ -43,7 +43,7 @@ function connectToDb() {
   });
 }
 
-function saveMessageToDb(request, response) {
+function saveRequestToDb(request, response) {
   return new Promise((resolve, reject) => {
     const obj = {
       timestamp: Date.now(),
