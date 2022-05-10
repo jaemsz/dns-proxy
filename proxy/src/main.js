@@ -19,6 +19,30 @@ const dnsServer = {
   type: dnsServerType
 };
 
+function connectToDb() {
+  mongoClient.connect(mongoUrl, async function(err, db) {
+    console.log("Connecting to mongo");
+    if (err) {
+      console.log("Failed to connect to mongo");
+      throw err;
+    }
+    mongoDb = db;
+    const dbo = mongoDb.db("dns");
+    const collections = await mongoDb.db("dns").listCollections({}, { nameOnly: true }).toArray();
+    console.log("collections", collections);
+    let exists = false;
+    collections.forEach(collection => {
+      if (collection.name === "requests") exists = true;
+    });
+    if (!exists) {
+      dbo.createCollection("requests", function(err, _res) {
+        if (err) throw err;
+        console.log("dns.requests collection created");
+      });
+    }
+  });
+}
+
 function saveMessageToDb(request, response) {
   return new Promise((resolve, reject) => {
     const obj = {
@@ -67,10 +91,10 @@ function handleRequest(request, response) {
   asyncLib.parallel(f, async function() {
     response.send();
     try {
-      const res = await saveMessageToDb(request, response)
-      console.log("Saved message to DB", res);
+      const res = await saveRequestToDb(request, response)
+      console.log("Saved request and response to DB", res);
     } catch {
-      console.log("Failed to save message to DB");
+      console.log("Failed to save request and response to DB");
     }
   });
 }
@@ -78,27 +102,7 @@ function handleRequest(request, response) {
 const server = dns.createServer();
 server.on("listening", () => {
   console.log("Server listening on", server.address());
-  mongoClient.connect(mongoUrl, async function(err, db) {
-    console.log("Connecting to mongo");
-    if (err) {
-      console.log("Failed to connect to mongo");
-      throw err;
-    }
-    mongoDb = db;
-    const dbo = mongoDb.db("dns");
-    const collections = await mongoDb.db("dns").listCollections({}, { nameOnly: true }).toArray();
-    console.log("collections", collections);
-    let exists = false;
-    collections.forEach(collection => {
-      if (collection.name === "requests") exists = true;
-    });
-    if (!exists) {
-      dbo.createCollection("requests", function(err, _res) {
-        if (err) throw err;
-        console.log("dns.requests collection created");
-      });
-    }
-  });
+  connectToDb();
 });
 server.on("error", (err, _buff, _req, _res) => console.error(err.stack));
 server.on("socketError", (err, _socket) => console.error(err));
