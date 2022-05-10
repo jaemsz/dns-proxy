@@ -64,20 +64,19 @@ function handleRequest(request, response) {
   request.question.forEach(question => {
     f.push(cb => proxy(question, response, cb));
   });
-  asyncLib.parallel(f, function() {
+  asyncLib.parallel(f, async function() {
     response.send();
-      saveMessageToDb(request, response)
-        .then((res) => {
-          console.log("saveMessageToDb suceeded", res);
-        })
-        .catch((err) => {
-          console.log("saveMessageToDb failed", err);
-        })
+    try {
+      const res = await saveMessageToDb(request, response)
+      console.log("Saved message to DB", res);
+    } catch {
+      console.log("Failed to save message to DB");
+    }
   });
 }
 
 const server = dns.createServer();
-server.on("listening", () => {
+server.on("listening", async () => {
   console.log("Server listening on", server.address());
   mongoClient.connect(mongoUrl, function(err, db) {
     console.log("Connecting to mongo");
