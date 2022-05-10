@@ -59,7 +59,7 @@ function proxy(question, response, cb) {
   request.send();
 }
 
-function handleRequest(request, response) {
+async function handleRequest(request, response) {
   const f = [];
   request.question.forEach(question => {
     f.push(cb => proxy(question, response, cb));
@@ -67,7 +67,7 @@ function handleRequest(request, response) {
   asyncLib.parallel(f, function() {
     response.send();
     try {
-      saveMessageToDb(request, response);
+      await saveMessageToDb(request, response);
     } catch {
       console.log("saveMessageToDb failed");
     }
@@ -79,7 +79,10 @@ server.on("listening", () => {
   console.log("Server listening on", server.address());
   mongoClient.connect(mongoUrl, function(err, db) {
     console.log("Connecting to mongo");
-    if (err) throw err;
+    if (err) {
+      console.log("Failed to connect to mongo");
+      throw err;
+    }
     mongoDb = db;
     const dbo = mongoDb.db("dns");
     dbo.createCollection("requests", function(err, _res) {
