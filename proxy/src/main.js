@@ -87,10 +87,14 @@ server.on("listening", () => {
     }
     mongoDb = db;
     const dbo = mongoDb.db("dns");
-    dbo.createCollection("requests", function(err, _res) {
-      if (err) throw err;
-      console.log("dns.requests collection created");
-    });
+    const collections = await client.db(dbName).listCollections({}, { nameOnly: true }).toArray();
+    console.log("collections", collections);
+    if (!collections.includes("requests")) {
+      dbo.createCollection("requests", function(err, _res) {
+        if (err) throw err;
+        console.log("dns.requests collection created");
+      });  
+    }
   });
 });
 server.on("error", (err, _buff, _req, _res) => console.error(err.stack));
