@@ -59,8 +59,7 @@ function saveRequestToDb(request, response) {
         resolve(res);
       });  
     } else {
-      console.log("mongoDb is null");
-      reject();
+      reject("mongoDb === null");
     }
   });
 }
@@ -74,7 +73,7 @@ function proxy(question, response, cb) {
   });
   request.on("message", (err, msg) => {
     if (err) throw err;
-    console.log("msg", msg);
+    // console.log("msg", msg);
     msg.answer.forEach(a => {
       response.answer.push(a)
     });
@@ -93,8 +92,8 @@ function handleRequest(request, response) {
     try {
       const res = await saveRequestToDb(request, response)
       console.log("Saved request and response to DB", res);
-    } catch {
-      console.log("Failed to save request and response to DB");
+    } catch (err) {
+      console.log("Failed to save request and response to DB", err);
     }
   });
 }
