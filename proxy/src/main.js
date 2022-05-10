@@ -3,7 +3,7 @@ const dns = require("native-dns");
 const asyncLib = require("async");
 const mongo = require("mongodb");
 
-const mongoUrl = process.env.DNS_MONGO_URL || "mongodb://127.0.0.1:27017/";
+const mongoUrl = process.env.DNS_MONGO_URL || "mongodb://127.0.0.1:27017";
 const mongoClient = mongo.MongoClient;
 let mongoDb = null;
 
@@ -91,7 +91,7 @@ server.on("listening", () => {
       if (err) throw err;
       console.log("dns.requests collection created");
     });
-  });  
+  });
 });
 server.on("error", (err, _buff, _req, _res) => console.error(err.stack));
 server.on("socketError", (err, _socket) => console.error(err));
