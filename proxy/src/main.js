@@ -66,7 +66,11 @@ function handleRequest(request, response) {
   });
   asyncLib.parallel(f, function() {
     response.send();
-    saveMessageToDb(request, response);
+    try {
+      saveMessageToDb(request, response);
+    } catch {
+      console.log("saveMessageToDb failed");
+    }
   });
 }
 
