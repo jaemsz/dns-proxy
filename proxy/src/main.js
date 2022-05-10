@@ -7,16 +7,6 @@ const mongoUrl = process.env.DNS_MONGO_URL || "mongodb://localhost:27017/";
 const mongoClient = mongo.MongoClient;
 let mongoDb = null;
 
-mongoClient.connect(mongoUrl, function(err, db) {
-  if (err) throw err;
-  mongoDb = db;
-  const dbo = mongoDb.db("dns");
-  dbo.createCollection("requests", function(err, _res) {
-    if (err) throw err;
-    console.log("dns.requests collection created");
-  });
-});
-
 const dnsListeningPort = +process.env.DNS_PORT || 53;
 const dnsServerAddress = process.env.DNS_SERVER_ADDRESS || "8.8.8.8";
 const dnsServerPort = +process.env.DNS_SERVER_PORT || 53;
@@ -36,13 +26,18 @@ function saveMessageToDb(request, response) {
       request: request,
       response: response
     };
-    const dbo = mongoDb.db("dns");
-    dbo.collection("requests").insertOne(obj, function(err, res) {
-      if (err) {
-        reject(err);
-      }
-      resolve(res);
-    });
+    if (mongoDb) {
+      const dbo = mongoDb.db("dns");
+      dbo.collection("requests").insertOne(obj, function(err, res) {
+        if (err) {
+          reject(err);
+        }
+        resolve(res);
+      });  
+    } else {
+      console.log("mongoDb is null");
+      reject();
+    }
   });
 }
 
@@ -76,7 +71,19 @@ function handleRequest(request, response) {
 }
 
 const server = dns.createServer();
-server.on("listening", () => console.log("Server listening on", server.address()));
+server.on("listening", () => {
+  console.log("Server listening on", server.address());
+  mongoClient.connect(mongoUrl, function(err, db) {
+    console.log("Connecting to mongo");
+    if (err) throw err;
+    mongoDb = db;
+    const dbo = mongoDb.db("dns");
+    dbo.createCollection("requests", function(err, _res) {
+      if (err) throw err;
+      console.log("dns.requests collection created");
+    });
+  });  
+});
 server.on("error", (err, _buff, _req, _res) => console.error(err.stack));
 server.on("socketError", (err, _socket) => console.error(err));
 server.on("request", handleRequest);
