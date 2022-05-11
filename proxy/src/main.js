@@ -84,7 +84,7 @@ function proxy(question, response) {
 function handleRequest(request, response) {
   const f = [];
   request.question.forEach(question => {
-    f.push(proxy(question, response));
+    f.push(() => proxy(question, response));
   });
   asyncLib.parallel(f, async function() {
     response.send();
