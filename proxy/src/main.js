@@ -2,6 +2,7 @@
 const dns = require("native-dns");
 const asyncLib = require("async");
 const mongoDatabase = require("./mongo-database");
+const CassandraDatabase = require("./cassandra-database");
 
 const dnsListeningPort = +process.env.DNS_PORT || 53;
 const dnsServerAddress = process.env.DNS_SERVER_ADDRESS || "8.8.8.8";
@@ -10,7 +11,7 @@ const dnsServerType = process.env.DNS_SERVER_TYPE || "udp";
 const dnsTimeout = +process.env.DNS_TIMEOUT || 1000;
 
 const targetDatabase = process.env.TARGET_DATABASE || "mongo";
-const mongoConnectionString = process.env.MONGO_URL || "mongodb://127.0.0.1:27017";
+const mongoConnectionString = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017";
 
 let db = null;
 
