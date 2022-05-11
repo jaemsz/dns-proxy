@@ -78,7 +78,7 @@ function proxy(question, response, cb) {
       response.answer.push(a)
     });
   });
-  request.end("end", cb);
+  request.on("end", cb);
   request.send();
 }
 
