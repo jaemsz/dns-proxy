@@ -2,7 +2,7 @@
 const dns = require("native-dns");
 const asyncLib = require("async");
 const mongoDatabase = require("./mongo-database");
-const CassandraDatabase = require("./cassandra-database");
+const cassandraDatabase = require("./cassandra-database");
 
 const dnsListeningPort = +process.env.DNS_PORT || 53;
 const dnsServerAddress = process.env.DNS_SERVER_ADDRESS || "8.8.8.8";
@@ -10,8 +10,17 @@ const dnsServerPort = +process.env.DNS_SERVER_PORT || 53;
 const dnsServerType = process.env.DNS_SERVER_TYPE || "udp";
 const dnsTimeout = +process.env.DNS_TIMEOUT || 1000;
 
+// Mongo is the default target database
 const targetDatabase = process.env.TARGET_DATABASE || "mongo";
+// Mongo connection information
+const mongoUsername = process.env.MONGO_USERNAME || "";
+const mongoPassword = process.env.MONGO_PASSWORD || "";
 const mongoConnectionString = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017";
+// Cassandra connection information
+const cassandraUsername = process.env.CASSANDRA_USERNAME || "";
+const cassandraPassword = process.env.CASSANDRA_PASSWORD || "";
+const cassandraClusterIPs = process.env.CASSANDRA_CLUSTER_IPS || "";
+const cassandraDataCenter = process.env.CASSANDRA_DATACENTER || "";
 
 let db = null;
 
@@ -62,6 +71,9 @@ function handleListening() {
   if (targetDatabase === "mongo") {
     db = new mongoDatabase.MongoDatabase();
     db.connect(mongoConnectionString);
+  } else if (targetDatabase === "cassandra") {
+    db = new cassandraDatabase.CassandraDatabase();
+    db.connect();
   }
 }
 
