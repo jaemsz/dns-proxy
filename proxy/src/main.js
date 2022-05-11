@@ -29,15 +29,15 @@ let db = null;
 const filter = {};
 
 const interfaces = networkInterfaces();
-for (const interfaceName in interfaces) {
+for (const iFaceName in interfaces) {
   const ip = {};
   let ipName;
-  for (const interface of interfaces[interfaceName]) {
-    if (interface.family === "IPv4") {
-      ipName = `ip-${interface.address.split(".").join("-")}`;
-      ip["ipv4"] = interface.address;
+  for (const iFace of interfaces[iFaceName]) {
+    if (iFace.family === "IPv4") {
+      ipName = `ip-${iFace.address.split(".").join("-")}`;
+      ip["ipv4"] = iFace.address;
     } else {
-      ip["ipv6"] = interface.address;
+      ip["ipv6"] = iFace.address;
     }
     filter[ipName] = ip;
   }
