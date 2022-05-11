@@ -71,18 +71,23 @@ function handleRequest(request, response) {
   const f = [];
   request.question.forEach(question => {
     if (question.name in filter) {
-      response.answer.push(dns["A"]({
-        name: question.name,
-        type: "A",
-        address: filter[question.name]["ipv4"],
-        ttl: 3600
-      }));
-      response.answer.push(dns["AAAA"]({
-        name: question.name,
-        type: "AAAA",
-        address: filter[question.name]["ipv6"],
-        ttl: 3600
-      }));
+      if (question.type === 1) {
+        response.answer.push(dns["A"]({
+          name: question.name,
+          type: "A",
+          address: filter[question.name]["ipv4"],
+          ttl: 3600
+        }));  
+      } else if (question.type === 28) {
+        response.answer.push(dns["AAAA"]({
+          name: question.name,
+          type: "AAAA",
+          address: filter[question.name]["ipv6"],
+          ttl: 3600  
+        }));
+      } else {
+        console.error("Unhandled type", question);
+      }
     } else {
       f.push((cb) => proxy(question, response, cb));
     }
