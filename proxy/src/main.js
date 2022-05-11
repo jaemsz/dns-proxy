@@ -26,15 +26,20 @@ const cassandraDataCenter = process.env.CASSANDRA_DATACENTER || "";
 
 let db = null;
 
-const ipStrMap = {};
+const filter = {};
 
 const interfaces = networkInterfaces();
 for (const interfaceName in interfaces) {
+  const ip = {};
+  let ipName;
   for (const interface of interfaces[interfaceName]) {
     if (interface.family === "IPv4") {
-      const ipStr = `ip-${interface.address.split(".").join("-")}`;
-      ipStrMap[ipStr] = interface.address;  
+      ipName = `ip-${interface.address.split(".").join("-")}`;
+      ip["ipv4"] = interface.address;
+    } else {
+      ip["ipv6"] = interface.address;
     }
+    filter[ipName] = ip;
   }
 }
 
@@ -65,7 +70,13 @@ function proxy(question, response, cb) {
 function handleRequest(request, response) {
   const f = [];
   request.question.forEach(question => {
-    f.push((cb) => proxy(question, response, cb));
+    if (question.name in filter) {
+      response.answer.push(dns["A"]({ type: "A", address: filter[question.name]["ipv4"], ttl: 3600 }));
+      response.answer.push(dns["AAAA"]({ type: "AAAA", address: filter[question.name]["ipv6"], ttl: 3600 }));
+      console.log("response.answer", response.answer);
+    } else {
+      f.push((cb) => proxy(question, response, cb));
+    }
   });
   parallel(f, async function() {
     response.send();

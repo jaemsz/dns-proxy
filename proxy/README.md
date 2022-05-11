@@ -24,9 +24,7 @@ dns-warrior is a nodejs application that is capable of proxying DNS requests and
 
 ## How to run dns-warrior on AWS EC2 Ubuntu image
 - Install Docker
-- Install MongoDB
-  - Pull mongodb image
-  - Start container
+- Install supported database
 - Clone the git repo
 - Port 53 is in use by systemd-resolve, so this service needs to be stopped and disabled.
 - Update /etc/resolv.conf
@@ -45,7 +43,7 @@ dns-warrior is a nodejs application that is capable of proxying DNS requests and
 - [ ] Add support for ElasticSearch
 - [ ] Add support for Postgresql
 - [ ] Add support for Cassandra
-- [ ] Add support for Mongo
+- [x] Add support for Mongo
 - [ ] Add Dockerfile for dns-proxy
 - [ ] Add Docker compose file
 - [ ] Add an express web server to display DNS requests
