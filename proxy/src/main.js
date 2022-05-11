@@ -64,7 +64,7 @@ function saveRequestToDb(request, response) {
   });
 }
 
-function proxy(question, response) {
+function proxy(question, response, cb) {
   console.log("proxying", question);
   const request = dns.Request({
     question: question,
@@ -78,14 +78,14 @@ function proxy(question, response) {
       response.answer.push(a)
     });
   });
-  request.end("end", () => {});
+  request.end("end", cb);
   request.send();
 }
 
 function handleRequest(request, response) {
   const f = [];
   request.question.forEach(question => {
-    f.push(() => proxy(question, response));
+    f.push((cb) => proxy(question, response, cb));
   });
   asyncLib.parallel(f, async function() {
     response.send();
