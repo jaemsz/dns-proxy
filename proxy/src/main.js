@@ -71,8 +71,18 @@ function handleRequest(request, response) {
   const f = [];
   request.question.forEach(question => {
     if (question.name in filter) {
-      response.answer.push(dns["A"]({ type: "A", address: filter[question.name]["ipv4"], ttl: 3600 }));
-      response.answer.push(dns["AAAA"]({ type: "AAAA", address: filter[question.name]["ipv6"], ttl: 3600 }));
+      response.answer.push(dns["A"]({
+        name: question.name,
+        type: "A",
+        address: filter[question.name]["ipv4"],
+        ttl: 3600
+      }));
+      response.answer.push(dns["AAAA"]({
+        name: question.name,
+        type: "AAAA",
+        address: filter[question.name]["ipv6"],
+        ttl: 3600
+      }));
       console.log("response.answer", response.answer);
     } else {
       f.push((cb) => proxy(question, response, cb));
