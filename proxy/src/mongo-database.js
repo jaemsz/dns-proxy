@@ -8,11 +8,11 @@ module.exports.MongoDatabase = function() {
   database.Database.apply(this, arguments);
 };
 
-MongoDatabase.prototype = Object.create(database.Database.prototype);
+module.exports.MongoDatabase.prototype = Object.create(database.Database.prototype);
 
-MongoDatabase.prototype.constructor = this.MongoDatabase;
+module.exports.MongoDatabase.prototype.constructor = this.MongoDatabase;
 
-MongoDatabase.prototype.connect = function(connectionString) {
+module.exports.MongoDatabase.prototype.connect = function(connectionString) {
   mongoClient.connect(connectionString, async function(err, db) {
     console.log("Connecting to mongo");
     if (err) {
@@ -39,7 +39,7 @@ MongoDatabase.prototype.connect = function(connectionString) {
   });
 }
 
-MongoDatabase.prototype.insert = function(request, response) {
+module.exports.MongoDatabase.prototype.insert = function(request, response) {
   return new Promise((resolve, reject) => {
     const obj = {
       timestamp: Date.now(),
@@ -60,7 +60,7 @@ MongoDatabase.prototype.insert = function(request, response) {
   });
 }
 
-MongoDatabase.prototype.close = function() {
+module.exports.MongoDatabase.prototype.close = function() {
   if (mongoDb) {
     console.log("Closing mongo connection");
     mongoDb.close();

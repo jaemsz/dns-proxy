@@ -4,14 +4,14 @@ module.exports.Database = function() {
   }
 }
 
-Database.prototype.connect = function() {
+module.exports.Database.prototype.connect = function() {
   throw new Error("Abstract method!");
 }
 
-Database.prototype.insert = function() {
+module.exports.Database.prototype.insert = function() {
   throw new Error("Abstract method!");
 }
 
-Database.prototype.close = function() {
+module.exports.Database.prototype.close = function() {
   throw new Error("Abstract method!");
 }

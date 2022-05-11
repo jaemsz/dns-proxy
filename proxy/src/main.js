@@ -46,8 +46,8 @@ function handleRequest(request, response) {
   asyncLib.parallel(f, async function() {
     response.send();
     try {
-      const res = await db.insert(request, response)
-      console.log("Saved request and response to DB", res);
+      await db.insert(request, response);
+      console.log("Saved request and response to DB");
     } catch (err) {
       console.log("Failed to save request and response to DB", err);
     }
