@@ -1,11 +1,7 @@
 "use strict";
 const dns = require("native-dns");
 const asyncLib = require("async");
-const mongo = require("mongodb");
-
-const mongoUrl = process.env.DNS_MONGO_URL || "mongodb://127.0.0.1:27017";
-const mongoClient = mongo.MongoClient;
-let mongoDb = null;
+const mongoDatabase = require("./mongo-database");
 
 const dnsListeningPort = +process.env.DNS_PORT || 53;
 const dnsServerAddress = process.env.DNS_SERVER_ADDRESS || "8.8.8.8";
@@ -13,56 +9,16 @@ const dnsServerPort = +process.env.DNS_SERVER_PORT || 53;
 const dnsServerType = process.env.DNS_SERVER_TYPE || "udp";
 const dnsTimeout = +process.env.DNS_TIMEOUT || 1000;
 
+const targetDatabase = process.env.TARGET_DATABASE || "mongo";
+const mongoConnectionString = process.env.MONGO_URL || "mongodb://127.0.0.1:27017";
+
+let db;
+
 const dnsServer = {
   address: dnsServerAddress,
   port: dnsServerPort,
   type: dnsServerType
 };
-
-function connectToDb() {
-  mongoClient.connect(mongoUrl, async function(err, db) {
-    console.log("Connecting to mongo");
-    if (err) {
-      console.log("Failed to connect to mongo");
-      throw err;
-    }
-    mongoDb = db;
-    const dbo = mongoDb.db("dns");
-    const collections = await mongoDb.db("dns").listCollections({}, { nameOnly: true }).toArray();
-    console.log("collections", collections);
-    let exists = false;
-    collections.forEach(collection => {
-      if (collection.name === "requests") exists = true;
-    });
-    if (!exists) {
-      dbo.createCollection("requests", function(err, _res) {
-        if (err) throw err;
-        console.log("dns.requests collection created");
-      });
-    }
-  });
-}
-
-function saveRequestToDb(request, response) {
-  return new Promise((resolve, reject) => {
-    const obj = {
-      timestamp: Date.now(),
-      request: request,
-      response: response
-    };
-    if (mongoDb) {
-      const dbo = mongoDb.db("dns");
-      dbo.collection("requests").insertOne(obj, function(err, res) {
-        if (err) {
-          reject(err);
-        }
-        resolve(res);
-      });  
-    } else {
-      reject("mongoDb === null");
-    }
-  });
-}
 
 function proxy(question, response, cb) {
   console.log("proxying", question);
@@ -90,7 +46,7 @@ function handleRequest(request, response) {
   asyncLib.parallel(f, async function() {
     response.send();
     try {
-      const res = await saveRequestToDb(request, response)
+      const res = await db.insert(request, response)
       console.log("Saved request and response to DB", res);
     } catch (err) {
       console.log("Failed to save request and response to DB", err);
@@ -98,16 +54,23 @@ function handleRequest(request, response) {
   });
 }
 
-const server = dns.createServer();
-server.on("listening", () => {
+function handleListening() {
   console.log("Server listening on", server.address());
-  connectToDb();
-});
+  if (targetDatabase === "mongo") {
+    db = new mongoDatabase.MongoDatabase();
+    db.connect(mongoConnectionString);
+  }
+}
+
+function handleClose() {
+  console.log("server closed", server.address());
+  db.close();
+}
+
+const server = dns.createServer();
+server.on("listening", handleListening);
 server.on("error", (err, _buff, _req, _res) => console.error(err.stack));
 server.on("socketError", (err, _socket) => console.error(err));
 server.on("request", handleRequest);
-server.on("close", () => {
-  console.log("server closed", server.address());
-  if (mongoDb) mongoDb.close();
-});
+server.on("close", handleClose);
 server.serve(dnsListeningPort);

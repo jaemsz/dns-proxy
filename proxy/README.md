@@ -1,7 +1,7 @@
-# dns-proxy
+# dns-warrior
 
 ## Summary
-dns-proxy is a nodejs application that is capable of proxying DNS requests and persisting the requests as well as the responses to a database for further analysis.
+dns-warrior is a nodejs application that is capable of proxying DNS requests and persisting the requests as well as the responses to a database for further analysis.
 
 ## Supported Databases
 - MongoDB
@@ -22,16 +22,16 @@ dns-proxy is a nodejs application that is capable of proxying DNS requests and p
 - DNS request timeout
   - default is 1000 (1 second)
 
-## How to run dns-proxy on AWS EC2 Ubuntu image
-- Port 53 is in use by systemd-resolve, so this service needs to be stopped and disabled.
-- Update /etc/resolv.conf
-  - nameserver 127.0.0.1
+## How to run dns-warrior on AWS EC2 Ubuntu image
+- Install Docker
 - Install MongoDB
-  - Install docker
   - Pull mongodb image
   - Start container
 - Clone the git repo
-- Run dns-proxy
+- Port 53 is in use by systemd-resolve, so this service needs to be stopped and disabled.
+- Update /etc/resolv.conf
+  - nameserver 127.0.0.1
+- Run dns-warrior
   - sudo node main.js
 
 ## How to modify DNS settings on Windows
@@ -39,13 +39,13 @@ dns-proxy is a nodejs application that is capable of proxying DNS requests and p
 - Run netsh.exe
 - interface ip show config
   - Find the interface which you want to modify DNS settings (ie. Ethernet 0)
-- interface ip set dns "Ethernet 0" static "IP address of DNS proxy"
+- interface ip set dns "Ethernet 0" static "IP address of dns-warrior"
 
 ## TODO
-- [ ] Add configuration file
 - [ ] Add support for ElasticSearch
 - [ ] Add support for Postgresql
 - [ ] Add support for Cassandra
+- [ ] Add support for Mongo
 - [ ] Add Dockerfile for dns-proxy
-- [ ] Add config for Kubernetes cluster
+- [ ] Add Docker compose file
 - [ ] Add an express web server to display DNS requests
