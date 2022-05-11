@@ -1,14 +1,14 @@
 const mongo = require("mongodb");
-const database = require("./database");
+const { Database } = require("./database");
 
 const mongoClient = mongo.MongoClient;
 let mongoDb = null;
 
 const MongoDatabase = function() {
-  database.Database.apply(this, arguments);
+  Database.apply(this, arguments);
 };
 
-MongoDatabase.prototype = Object.create(database.Database.prototype);
+MongoDatabase.prototype = Object.create(Database.prototype);
 
 MongoDatabase.prototype.constructor = this.MongoDatabase;
 

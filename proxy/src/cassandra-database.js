@@ -1,11 +1,11 @@
 const cassandra = require("cassandra-driver");
-const database = require("./database");
+const { Database } = require("./database");
 
 const CassandraDatabase = function() {
-  database.Database.apply(this, arguments);
+  Database.apply(this, arguments);
 };
 
-CassandraDatabase.prototype = Object.create(database.Database.prototype);
+CassandraDatabase.prototype = Object.create(Database.prototype);
 
 CassandraDatabase.prototype.constructor = this.CassandraDatabase;
 

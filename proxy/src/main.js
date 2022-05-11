@@ -1,6 +1,8 @@
 "use strict";
 const dns = require("native-dns");
 const { parallel } = require("async");
+const { networkInterfaces } = require("os");
+
 const { MongoDatabase } = require("./mongo-database");
 const { CassandraDatabase } = require("./cassandra-database");
 
@@ -23,6 +25,18 @@ const cassandraClusterIPs = process.env.CASSANDRA_CLUSTER_IPS || "";
 const cassandraDataCenter = process.env.CASSANDRA_DATACENTER || "";
 
 let db = null;
+
+const ipStrMap = {};
+
+const interfaces = networkInterfaces();
+for (const interfaceName in interfaces) {
+  for (const interface of interfaces[interfaceName]) {
+    if (interface.family === "IPv4") {
+      const ipStr = `ip-${interface.address.split(".").join("-")}`;
+      ipStrMap[ipStr] = interface.address;  
+    }
+  }
+}
 
 const dnsServer = {
   address: dnsServerAddress,
@@ -58,7 +72,7 @@ function handleRequest(request, response) {
     try {
       if (db) {
         await db.insert(request, response);
-        console.log("Saved request and response to DB");  
+        console.log("Saved request and response to DB");
       }
     } catch (err) {
       console.error("Failed to save request and response to DB", err);
