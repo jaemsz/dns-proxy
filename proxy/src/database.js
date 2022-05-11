@@ -1,5 +1,5 @@
 module.exports.Database = function() {
-  if (this.constructor === Database) {
+  if (this.constructor === module.exports.Database) {
     throw new Error("Can't instantiate abstract class!");
   }
 }
