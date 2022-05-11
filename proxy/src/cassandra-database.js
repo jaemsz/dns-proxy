@@ -1,3 +1,4 @@
+const cassandra = require("cassandra-driver");
 const database = require("./database");
 
 module.exports.CassandraDatabase = function() {
