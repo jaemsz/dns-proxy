@@ -12,7 +12,7 @@ const dnsTimeout = +process.env.DNS_TIMEOUT || 1000;
 const targetDatabase = process.env.TARGET_DATABASE || "mongo";
 const mongoConnectionString = process.env.MONGO_URL || "mongodb://127.0.0.1:27017";
 
-let db;
+let db = null;
 
 const dnsServer = {
   address: dnsServerAddress,
@@ -46,8 +46,10 @@ function handleRequest(request, response) {
   asyncLib.parallel(f, async function() {
     response.send();
     try {
-      await db.insert(request, response);
-      console.log("Saved request and response to DB");
+      if (db) {
+        await db.insert(request, response);
+        console.log("Saved request and response to DB");  
+      }
     } catch (err) {
       console.log("Failed to save request and response to DB", err);
     }
@@ -64,7 +66,7 @@ function handleListening() {
 
 function handleClose() {
   console.log("server closed", server.address());
-  db.close();
+  if (db) db.close();
 }
 
 const server = dns.createServer();
