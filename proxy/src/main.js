@@ -83,7 +83,6 @@ function handleRequest(request, response) {
         address: filter[question.name]["ipv6"],
         ttl: 3600
       }));
-      console.log("response.answer", response.answer);
     } else {
       f.push((cb) => proxy(question, response, cb));
     }
