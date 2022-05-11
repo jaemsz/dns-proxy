@@ -1,8 +1,8 @@
 "use strict";
 const dns = require("native-dns");
-const asyncLib = require("async");
-const mongoDatabase = require("./mongo-database");
-const cassandraDatabase = require("./cassandra-database");
+const { parallel } = require("async");
+const { MongoDatabase } = require("./mongo-database");
+const { CassandraDatabase } = require("./cassandra-database");
 
 const dnsListeningPort = +process.env.DNS_PORT || 53;
 const dnsServerAddress = process.env.DNS_SERVER_ADDRESS || "8.8.8.8";
@@ -53,7 +53,7 @@ function handleRequest(request, response) {
   request.question.forEach(question => {
     f.push((cb) => proxy(question, response, cb));
   });
-  asyncLib.parallel(f, async function() {
+  parallel(f, async function() {
     response.send();
     try {
       if (db) {
@@ -61,20 +61,26 @@ function handleRequest(request, response) {
         console.log("Saved request and response to DB");  
       }
     } catch (err) {
-      console.log("Failed to save request and response to DB", err);
+      console.error("Failed to save request and response to DB", err);
     }
   });
 }
 
-function handleListening() {
-  console.log("Server listening on", server.address());
+function connectToDatabase() {
   if (targetDatabase === "mongo") {
-    db = new mongoDatabase.MongoDatabase();
+    db = new MongoDatabase();
     db.connect(mongoConnectionString);
   } else if (targetDatabase === "cassandra") {
-    db = new cassandraDatabase.CassandraDatabase();
+    db = new CassandraDatabase();
     db.connect();
+  } else {
+    console.error("Invalid target database", targetDatabase);
   }
+}
+
+function handleListening() {
+  console.log("Server listening on", server.address());
+  connectToDatabase();
 }
 
 function handleClose() {

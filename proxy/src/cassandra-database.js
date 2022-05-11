@@ -1,19 +1,23 @@
 const cassandra = require("cassandra-driver");
 const database = require("./database");
 
-module.exports.CassandraDatabase = function() {
+const CassandraDatabase = function() {
   database.Database.apply(this, arguments);
 };
 
-module.exports.CassandraDatabase.prototype = Object.create(database.Database.prototype);
+CassandraDatabase.prototype = Object.create(database.Database.prototype);
 
-module.exports.CassandraDatabase.prototype.constructor = this.CassandraDatabase;
+CassandraDatabase.prototype.constructor = this.CassandraDatabase;
 
-module.exports.CassandraDatabase.prototype.connect = function(connectionString) {
+CassandraDatabase.prototype.connect = function(connectionString) {
 }
 
-module.exports.CassandraDatabase.prototype.insert = function(request, response) {
+CassandraDatabase.prototype.insert = function(request, response) {
 }
 
-module.exports.CassandraDatabase.prototype.close = function() {
+CassandraDatabase.prototype.close = function() {
+}
+
+module.exports = {
+  CassandraDatabase
 }

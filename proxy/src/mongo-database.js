@@ -4,19 +4,19 @@ const database = require("./database");
 const mongoClient = mongo.MongoClient;
 let mongoDb = null;
 
-module.exports.MongoDatabase = function() {
+const MongoDatabase = function() {
   database.Database.apply(this, arguments);
 };
 
-module.exports.MongoDatabase.prototype = Object.create(database.Database.prototype);
+MongoDatabase.prototype = Object.create(database.Database.prototype);
 
-module.exports.MongoDatabase.prototype.constructor = this.MongoDatabase;
+MongoDatabase.prototype.constructor = this.MongoDatabase;
 
-module.exports.MongoDatabase.prototype.connect = function(connectionString) {
+MongoDatabase.prototype.connect = function(connectionString) {
   mongoClient.connect(connectionString, async function(err, db) {
     console.log("Connecting to mongo");
     if (err) {
-      console.log("Failed to connect to mongo");
+      console.error("Failed to connect to mongo", err);
       throw err;
     }
     mongoDb = db;
@@ -39,7 +39,7 @@ module.exports.MongoDatabase.prototype.connect = function(connectionString) {
   });
 }
 
-module.exports.MongoDatabase.prototype.insert = function(request, response) {
+MongoDatabase.prototype.insert = function(request, response) {
   return new Promise((resolve, reject) => {
     const obj = {
       timestamp: Date.now(),
@@ -60,9 +60,13 @@ module.exports.MongoDatabase.prototype.insert = function(request, response) {
   });
 }
 
-module.exports.MongoDatabase.prototype.close = function() {
+MongoDatabase.prototype.close = function() {
   if (mongoDb) {
     console.log("Closing mongo connection");
     mongoDb.close();
   }
+}
+
+module.exports = {
+  MongoDatabase
 }
