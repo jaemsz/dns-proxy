@@ -17,7 +17,7 @@ const targetDatabase = process.env.TARGET_DATABASE || "mongo";
 // Mongo connection information
 const mongoUsername = process.env.MONGO_USERNAME || "";
 const mongoPassword = process.env.MONGO_PASSWORD || "";
-const mongoConnectionString = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017";
+const mongoConnectionString = process.env.MONGO_CONNECTION_STRING || "mongodb://0.0.0.0:27017";
 // Cassandra connection information
 const cassandraUsername = process.env.CASSANDRA_USERNAME || "";
 const cassandraPassword = process.env.CASSANDRA_PASSWORD || "";
