@@ -1,6 +1,8 @@
 .DEFAULT_GOAL:=help
 
 COMPOSE_POSTGRES := -f docker-compose.postgres.yml
+COMPOSE_MONGO := -f docker-compose.mongo.yml
+
 # --------------------------
 
 # load .env so that Docker Swarm Commands has .env values too. (https://github.com/moby/moby/issues/29133)
@@ -29,11 +31,17 @@ help:
 	@echo "		make up	c="postgresql"		--> start postgresql container"
 	@echo "		make logs c="postgresql"	t=100	--> get postgresql container last 100 lines"
 
-build:	## Build
-	@docker-compose ${COMPOSE_POSTGRES} build ${c}
+build_mongo:	## Build
+	@docker-compose ${COMPOSE_MONGO} build
 
-up:	## Start DnsWarrior
-	@docker-compose ${COMPOSE_POSTGRES} up -d ${c}
+build_postgres:	## Build
+	@docker-compose ${COMPOSE_POSTGRES} build
+
+up_mongo:	## Start DnsWarrior
+	@docker-compose ${COMPOSE_MONGO} up -d
+
+up_postgres:	## Start DnsWarrior
+	@docker-compose ${COMPOSE_POSTGRES} up -d
 
 start:	
 	@docker-compose ${COMPOSE_POSTGRES} start ${c}

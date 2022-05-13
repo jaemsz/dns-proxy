@@ -1,6 +1,7 @@
 version: "3"
 services:
   dns-warrior:
+    build: .
     container_name: warrior
     image: dns-warrior:1.0
     networks:
