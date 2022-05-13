@@ -4,7 +4,7 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY ["../proxy/package.json", "../proxy/package-lock.json", "../proxy/src/main.js", "../proxy/src/database.js", "../proxy/src/mongo-database.js", "../proxy/src/cassandra-database.js", "./"]
+COPY ["../proxy/package.json", "../proxy/package-lock.json", "../proxy/src/main.js", "../proxy/src/databases/database.js", "../proxy/src/databases/mongo-database.js", "../proxy/src/databases/cassandra-database.js", "../proxy/src/databases/postgresql-database.js", "./"]
 
 RUN npm install --omit=dev
 

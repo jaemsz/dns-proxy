@@ -1,16 +1,21 @@
-version: "3.5"
+version: "3"
 services:
   dns-warrior:
     container_name: warrior
     image: dns-warrior:1.0
-    network_mode: bridge
+    networks:
+      - warrior
     ports:
       - "53:53/udp"
-    links:
+    depends_on:
       - mongo
   mongo:
     container_name: mongo
     image: mongo
-    network_mode: bridge
+    networks:
+      - warrior
     ports:
       - "27017:27017"
+networks:
+  warrior:
+    driver: bridge
