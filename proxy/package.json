@@ -12,6 +12,7 @@
     "async": "^3.2.3",
     "cassandra-driver": "^4.6.3",
     "mongodb": "^4.5.0",
-    "native-dns": "^0.7.0"
+    "native-dns": "^0.7.0",
+    "pg": "^8.7.3"
   }
 }

@@ -1,10 +1,11 @@
 "use strict";
 const dns = require("native-dns");
 const { parallel } = require("async");
-const { networkInterfaces } = require("os");
+const { hostname } = require("os");
 
-const { MongoDatabase } = require("./mongo-database");
-const { CassandraDatabase } = require("./cassandra-database");
+const { MongoDatabase } = require("./databases/mongo-database");
+const { CassandraDatabase } = require("./databases/cassandra-database");
+const { PostgresqlDatabase } = require("./databases/postgresql-database");
 
 const dnsListeningPort = +process.env.DNS_PORT || 53;
 const dnsServerAddress = process.env.DNS_SERVER_ADDRESS || "8.8.8.8";
@@ -26,22 +27,11 @@ const cassandraDataCenter = process.env.CASSANDRA_DATACENTER || "";
 
 let db = null;
 
-const filter = {};
-
-const interfaces = networkInterfaces();
-for (const iFaceName in interfaces) {
-  const ip = {};
-  let ipName;
-  for (const iFace of interfaces[iFaceName]) {
-    if (iFace.family === "IPv4") {
-      ipName = `ip-${iFace.address.split(".").join("-")}`;
-      ip["ipv4"] = iFace.address;
-    } else {
-      ip["ipv6"] = iFace.address;
-    }
-    filter[ipName] = ip;
-  }
-}
+const hostNameToIP = {
+  hostname: hostname(),
+  ipv4: "127.0.0.1",
+  ipv6: "::1"
+};
 
 const dnsServer = {
   address: dnsServerAddress,
@@ -67,27 +57,31 @@ function proxy(question, response, cb) {
   request.send();
 }
 
+function respondWithLocalhostIP(question, response) {
+  if (question.type === 1) {
+    response.answer.push(dns["A"]({
+      name: question.name,
+      type: "A",
+      address: hostNameToIP.ipv4,
+      ttl: 3600
+    }));
+  } else if (question.type === 28) {
+    response.answer.push(dns["AAAA"]({
+      name: question.name,
+      type: "AAAA",
+      address: hostNameToIP.ipv6,
+      ttl: 3600
+    }));
+  } else {
+    console.error("Unhandled type", question);
+  }
+}
+
 function handleRequest(request, response) {
   const f = [];
   request.question.forEach(question => {
-    if (question.name in filter) {
-      if (question.type === 1) {
-        response.answer.push(dns["A"]({
-          name: question.name,
-          type: "A",
-          address: filter[question.name]["ipv4"],
-          ttl: 3600
-        }));  
-      } else if (question.type === 28) {
-        response.answer.push(dns["AAAA"]({
-          name: question.name,
-          type: "AAAA",
-          address: filter[question.name]["ipv6"],
-          ttl: 3600  
-        }));
-      } else {
-        console.error("Unhandled type", question);
-      }
+    if (question.name === hostNameToIP.hostname) {
+      respondWithLocalhostIP(question, response)
     } else {
       f.push((cb) => proxy(question, response, cb));
     }
@@ -96,8 +90,7 @@ function handleRequest(request, response) {
     response.send();
     try {
       if (db) {
-        await db.insert(request, response);
-        console.log("Saved request and response to DB");
+        await db.insert(response);
       }
     } catch (err) {
       console.error("Failed to save request and response to DB", err);
@@ -111,6 +104,9 @@ function connectToDatabase() {
     db.connect(mongoConnectionString);
   } else if (targetDatabase === "cassandra") {
     db = new CassandraDatabase();
+    db.connect();
+  } else if (targetDatabase === "postgresql") {
+    db = new PostgresqlDatabase();
     db.connect();
   } else {
     console.error("Invalid target database", targetDatabase);
