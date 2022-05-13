@@ -15,15 +15,12 @@ const dnsTimeout = +process.env.DNS_TIMEOUT || 1000;
 
 // Mongo is the default target database
 const targetDatabase = process.env.TARGET_DATABASE || "mongo";
-// Mongo connection information
-const mongoUsername = process.env.MONGO_USERNAME || "";
-const mongoPassword = process.env.MONGO_PASSWORD || "";
+// Mongo connection string
 const mongoConnectionString = process.env.MONGO_CONNECTION_STRING || "mongodb://mongo:27017";
-// Cassandra connection information
-const cassandraUsername = process.env.CASSANDRA_USERNAME || "";
-const cassandraPassword = process.env.CASSANDRA_PASSWORD || "";
-const cassandraClusterIPs = process.env.CASSANDRA_CLUSTER_IPS || "";
-const cassandraDataCenter = process.env.CASSANDRA_DATACENTER || "";
+// Cassandra connection string
+const cassandraConnectionString = process.env.CASSANDRA_CONNECTION_STRING || "";
+// Postgresql connection string
+const psqlConnectionString = process.env.PSQL_CONNECTION_STRING || "";
 
 let db = null;
 
@@ -103,10 +100,10 @@ function connectToDatabase() {
     db = new MongoDatabase();
     db.connect(mongoConnectionString);
   } else if (targetDatabase === "cassandra") {
-    db = new CassandraDatabase();
+    db = new CassandraDatabase(cassandraConnectionString);
     db.connect();
   } else if (targetDatabase === "postgresql") {
-    db = new PostgresqlDatabase();
+    db = new PostgresqlDatabase(psqlConnectionString);
     db.connect();
   } else {
     console.error("Invalid target database", targetDatabase);
