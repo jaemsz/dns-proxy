@@ -40,10 +40,11 @@ services:
       - ./src:/usr/app/
       - /usr/app/node_modules
     ports:
-      - "53:53"
+      - "53:53/udp"
     depends_on:
       - postgres
     environment:
+      TARGET_DATABASE: postgresql
       DATABASE_URL: postgres://postgres:changeme@postgres/dnswarrior
 
 networks:
