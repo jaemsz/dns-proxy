@@ -39,11 +39,10 @@ MongoDatabase.prototype.connect = function(connectionString) {
   });
 }
 
-MongoDatabase.prototype.insert = function(request, response) {
+MongoDatabase.prototype.insert = function(response) {
   return new Promise((resolve, reject) => {
     const obj = {
       timestamp: Date.now(),
-      request: request,
       response: response
     };
     if (mongoDb) {

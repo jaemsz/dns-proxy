@@ -1,7 +1,7 @@
-const { Client } = require("pg");
+const { Pool } = require("pg");
 const { Database } = require("./database");
 
-let pgClient;
+let pool = null;
 
 const PostgresqlDatabase = function() {
   Database.apply(this, arguments);
@@ -12,18 +12,18 @@ PostgresqlDatabase.prototype = Object.create(Database.prototype);
 PostgresqlDatabase.prototype.constructor = this.PostgresqlDatabase;
 
 PostgresqlDatabase.prototype.connect = function(connectionString) {
-  pgClient = new Client({ connectionString });
-  // pgClient.connect()
+  console.log("Connecting to postgresql");
+  pool = new Pool({ connectionString });
 }
 
-PostgresqlDatabase.prototype.insert = function(request, response) {
-
+PostgresqlDatabase.prototype.insert = function(response) {
+  console.log("response", response);
 }
 
-PostgresqlDatabase.prototype.close = function() {
+PostgresqlDatabase.prototype.close = async function() {
   if (pgClient) {
     console.log("Closing postgresql connection");
-    pgClient.close();
+    await pool.end();
   }
 }
 
