@@ -40,6 +40,9 @@ build_postgres:	## Build
 up_mongo:	## Start DnsWarrior
 	@docker-compose ${COMPOSE_MONGO} up -d
 
+down_mongo:			
+	@docker-compose ${COMPOSE_MONGO} down
+
 up_postgres:	## Start DnsWarrior
 	@docker-compose ${COMPOSE_POSTGRES} up -d
 

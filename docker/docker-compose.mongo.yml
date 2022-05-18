@@ -3,19 +3,65 @@ services:
   dns-warrior:
     build: ../proxy
     container_name: warrior
+    environment:
+      - MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING:-mongodb://root:changme@mongo:27017}
     networks:
       - warrior
     ports:
-      - "53:53/udp"
+      - "${DNS_PORT}:53/udp"
     depends_on:
       - mongo
   mongo:
     container_name: mongo
     image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT:-root}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS:-changme}
+      - MONGO_INITDB_DATABASE=${MONGO_DBNAME:-dns}
+    healthcheck:
+      #test: echo 'db.runCommand({serverStatus:1}).ok' | mongo admin -u $MONGO_ROOT -p $MONGO_PASS --quiet | grep 1
+      test: echo 'db.runCommand({serverStatus:1}).ok' | mongo admin --quiet | grep 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+
     networks:
       - warrior
     ports:
-      - "27017:27017"
+      - "${MONGODB_PORT}:27017"
+    volumes:
+      - type: volume
+        source: MONGO_DATA
+        target: /data/db
+      - type: volume
+        source: MONGO_CONFIG
+        target: /data/configdb
+  mongo-express:
+    container_name: mongo-express
+    image: mongo-express
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks: 
+      - warrior
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_ROOT:-root}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_DBNAME:-changme}
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_WEB_ADMIN:-admin}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_WEB_PASSWORD:-admin}
+    ports:
+      - '${MONGOEXPRESS_PORT}:8081'
+    volumes: 
+      - ./data:/data/db   
 networks:
   warrior:
     driver: bridge
+
+volumes:
+  MONGO_DATA:
+    name: MONGO_DATA
+  MONGO_CONFIG:
+    name: MONGO_CONFIG
